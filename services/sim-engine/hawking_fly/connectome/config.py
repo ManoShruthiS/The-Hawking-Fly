@@ -13,7 +13,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from pydantic import BaseModel
 
-_PROJECT_ROOT = Path(__file__).resolve().parents[3]  # repo root
+_PROJECT_ROOT = Path(__file__).resolve().parents[4]  # repo root
 
 
 class ConnectomeConfig(BaseModel):
