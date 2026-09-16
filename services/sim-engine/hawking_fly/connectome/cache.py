@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pandas as pd
 
-CACHE_DIR = Path(__file__).resolve().parents[3] / "data" / "connectome"
+CACHE_DIR = Path(__file__).resolve().parents[4] / "data" / "connectome"
 
 
 @dataclass
