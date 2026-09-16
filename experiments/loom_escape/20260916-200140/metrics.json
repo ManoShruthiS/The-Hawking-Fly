@@ -1,0 +1,52 @@
+{
+  "flash": {
+    "finite": true,
+    "shape": [
+      1,
+      4,
+      600,
+      65
+    ],
+    "mean_abs_response": 0.676277,
+    "std_response": 0.90111
+  },
+  "moving_edge": {
+    "finite": true,
+    "shape": [
+      1,
+      2,
+      465,
+      65
+    ],
+    "mean_abs_response": 0.691495,
+    "std_response": 0.91481
+  },
+  "loom": {
+    "finite": true,
+    "shape": [
+      1,
+      1,
+      700,
+      65
+    ],
+    "mean_abs_response": 0.743148,
+    "std_response": 1.034735
+  },
+  "pairwise_trace_mse": {
+    "flash_vs_moving_edge_mse": 5.432e-05,
+    "flash_vs_loom_mse": 0.00139767,
+    "moving_edge_vs_loom_mse": 0.0014009
+  },
+  "signature_norms": {
+    "flash": 9.879304,
+    "moving_edge": 8.721498,
+    "loom": 11.198231
+  },
+  "provenance": {
+    "seed": 0,
+    "experiment": "loom_escape",
+    "flyvis_pretrained_used": true,
+    "neuprint_circuit_status": "pending_token",
+    "labels": "flyvis forward responses on synthetic stimuli; no decoder claims."
+  }
+}
