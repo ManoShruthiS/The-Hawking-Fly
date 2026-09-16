@@ -20,6 +20,18 @@ LOOM_RECEPTOR_TYPES = ("LC4", "LPLC2")
 DESCENDING_NEURON_TYPES = ("DNp01",)
 
 
+def _receptor_criteria():
+    from neuprint import NeuronCriteria
+
+    return NeuronCriteria(type=list(LOOM_RECEPTOR_TYPES))
+
+
+def _dn_criteria():
+    from neuprint import NeuronCriteria
+
+    return NeuronCriteria(type=list(DESCENDING_NEURON_TYPES))
+
+
 def query_loom_escape_circuit(
     client: ConnectomeClient,
     *,
@@ -27,29 +39,26 @@ def query_loom_escape_circuit(
 ) -> dict[str, object]:
     """Trace the LC4/LPLC2 -> DNp01 path *in this dataset*.
 
-    Returns a dict with the neuron tables, the direct adjacency, and any
+    Returns a dict with the neuron tables, the direct adjacency edges, and any
     discovered intermediate neurons between the receptors and the giant fiber.
     Raises NoTokenError if no neuPrint token is configured.
     """
-    from neuprint import NeuronCriteria, fetch_neurons, merge_neuron_pairs
-
     result: dict[str, object] = {
         "dataset": client.config.dataset,
         "receptor_types": LOOM_RECEPTOR_TYPES,
         "descending_types": DESCENDING_NEURON_TYPES,
     }
 
-    receptor_df = client.fetch_neurons(" ".join(LOOM_RECEPTOR_TYPES))
-    dn_df = client.fetch_neurons(" ".join(DESCENDING_NEURON_TYPES))
+    receptor_df, _ = client.fetch_neurons(_receptor_criteria())
+    dn_df, _ = client.fetch_neurons(_dn_criteria())
 
     result["receptor_neurons"] = receptor_df
     result["dnp01_neurons"] = dn_df
 
     # Direct synapses receptors -> giant fiber
-    adj = client.fetch_adjacencies(
-        " ".join(LOOM_RECEPTOR_TYPES), " ".join(DESCENDING_NEURON_TYPES)
-    )
-    result["direct_receptor_to_dnp01"] = adj
+    sources_df, edges_df = client.fetch_adjacencies(_receptor_criteria(), _dn_criteria())
+    result["direct_receptor_to_dnp01_neurons"] = sources_df
+    result["direct_receptor_to_dnp01_edges"] = edges_df
 
     # Intermediate exploration: downstream of receptors, then who hits DNp01
     # upstream partners. (Heavy queries are gated behind explicit use so the
@@ -65,15 +74,19 @@ def build_loom_escape_subgraph(client: ConnectomeClient) -> dict[str, object]:
     """Produce a bounded, anatomy-aware subgraph for the propagation layer.
 
     Pulls the receptors + giant fiber + (optionally) their partners and
-    returns adjacency data ready for `propagation.graph_build` to consume.
+    returns edge data ready for `propagation.graph_build` to consume.
     Raises NoTokenError if no neuPrint token is configured.
     """
     data = query_loom_escape_circuit(client)
 
-    # Collect edge rows from the direct adjacency table.
-    adj: "pd.DataFrame" = data["direct_receptor_to_dnp01"]  # type: ignore[assignment]
-    edges = adj[["bodyId", "bodyId_pre", "bodyId_post", "syn_count"]].rename(
-        columns={"bodyId_pre": "pre", "bodyId_post": "post", "syn_count": "weight"}
+    # Collect edge rows from the direct adjacency edges table.
+    edge_df: "pd.DataFrame" = data["direct_receptor_to_dnp01_edges"]  # type: ignore[assignment]
+    edges = edge_df.rename(
+        columns={
+            "bodyId_pre": "pre",
+            "bodyId_post": "post",
+            "weight": "syn_count",
+        }
     )
     data["edges"] = edges
     return data
