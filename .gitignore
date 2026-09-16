@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Environment / secrets
+.env
+.env.local
+*.token
+
+# Data caches (connectome snapshots, stimuli caches)
+data/connectome/
+data/stimuli/__cached__/
+
+# Experiments output (reproducible runs are stored via the harness);
+# keep generated plots/metrics but they can be large — uncomment to ignore:
+# experiments/**/plots/
+# experiments/**/*.json
+
+# Node / frontend
+node_modules/
+.next/
+dist/
+build/
+
+# OS
+.DS_Store
