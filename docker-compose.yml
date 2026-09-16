@@ -1,0 +1,20 @@
+services:
+  sim-engine:
+    build:
+      context: ./services/sim-engine
+    volumes:
+      - ./data:/app/data
+      - ./experiments:/app/experiments
+      - ./services/sim-engine:/app/services/sim-engine
+    environment:
+      - NEUPRINT_TOKEN=${NEUPRINT_TOKEN:-}
+      - NEUPRINT_DATASET=male-cns:v1.0
+    command: python -m hawking_fly.experiments.run --config experiments/loom_escape/config.json
+
+  # Placeholder for Phase 0D (FastAPI + WebSocket) and Phase 1 (FlyGym).
+  # web:
+  #   build: ./web
+  #   ports: ["3000:3000"]
+
+volumes:
+  data:
