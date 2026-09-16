@@ -3,6 +3,11 @@
 Phase 0A runs flyvis-only validation until the user adds `NEUPRINT_TOKEN` to
 `.env`. Every call that needs neuPrint raises `NoTokenError` instead of
 blocking the flyvis-first boot path.
+
+Return shapes follow neuprint-python 0.6.x:
+  * fetch_neurons -> (neurons_df, criteria)
+  * fetch_adjacencies -> (sources_df, edges_df) with edges columns
+    bodyId_pre / bodyId_post / roi / weight
 """
 
 from __future__ import annotations
@@ -45,28 +50,36 @@ class ConnectomeClient:
             )
         return self._client
 
-    def fetch_neurons(self, query: str) -> "pd.DataFrame":
-        """Fetch neurons by type query (e.g. 'DNp01', 'LC4', 'LPLC2')."""
+    def fetch_neurons(self, query: Any) -> tuple["pd.DataFrame", Any]:
+        """Fetch neurons by type query (e.g. 'DNp01', 'LC4', 'LPLC2').
+
+        `query` may be a plain string or a `neuprint.NeuronCriteria`.
+        Returns the neuprint tuple (neurons_df, criteria/details).
+        """
         from neuprint import fetch_neurons
 
         return fetch_neurons(query, client=self.client)
 
-    def fetch_adjacencies(self, source: str, target: str | None = None) -> "pd.DataFrame":
-        """Fetch synapse adjacency (optionally source->target)."""
+    def fetch_adjacencies(self, source: Any, target: Any) -> tuple["pd.DataFrame", "pd.DataFrame"]:
+        """Fetch synapse adjacency between two neuron criteria.
+
+        Returns the neuprint tuple (sources_df, edges_df); the edges frame has
+        columns bodyId_pre / bodyId_post / roi / weight.
+        """
         from neuprint import fetch_adjacencies
 
         return fetch_adjacencies(source, target, client=self.client)
 
     def find_connections(
         self,
-        source: str,
-        target: str,
+        source: Any,
+        target: Any,
         min_synapses: int = 1,
     ) -> "pd.DataFrame":
         """Return a table of connections between two sets of cell types."""
-        from neuprint import fetch_connections
+        from neuprint import fetch_simple_connections
 
-        return fetch_connections(
+        return fetch_simple_connections(
             source, target, min_synapses=min_synapses, client=self.client
         )
 
