@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hawking-fly"
+version = "0.1.0"
+description = "The Hawking Fly — connectome-constrained neural simulation of a fly whose motor output is blocked"
+readme = "readme.md"
+requires-python = ">=3.11"
+dependencies = [
+    # NOTE ON PINNING: flyvis pins a specific torch build. Do NOT force a
+    # conflicting torch version here. Install flyvis first (it pulls its own
+    # torch), then this package; pip resolves the rest around that pin.
+    "numpy",
+    "scipy",
+    "networkx",
+    "scikit-learn",
+    "python-dotenv",
+    "pydantic>=2",
+    "neuprint-python",
+]
+
+[project.optional-dependencies]
+validation = [
+    "flyvis",
+    "matplotlib",
+]
+dev = [
+    "pytest",
+    "jupyter",
+    "nbconvert",
+]
+
+# Adjusted once the environment is successfully built — record exact working
+# versions in services/sim-engine/requirements.lock (see install script).
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["hawking_fly*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
